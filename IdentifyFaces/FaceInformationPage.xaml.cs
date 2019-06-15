@@ -44,29 +44,31 @@ namespace IdentifyFaces
             faces = await faceServiceClient.DetectAsync(encoded.AsStream(), true, true, new FaceAttributeType[] { FaceAttributeType.Age, FaceAttributeType.Gender, FaceAttributeType.Glasses, FaceAttributeType.Emotion});
             faceIds = faces.Select(face => face.FaceId).ToArray();
 
-            var results = await faceServiceClient.IdentifyAsync(personGroupId, faceIds);
-            using (SKCanvas canvas = new SKCanvas(libraryBitmap))
+            if (faces.Count() > 0)
             {
-                using (SKPaint paint = new SKPaint())
+                var results = await faceServiceClient.IdentifyAsync(personGroupId, faceIds);
+                using (SKCanvas canvas = new SKCanvas(libraryBitmap))
                 {
-                    paint.Color = new SKColor(255, 0, 0);
-                    paint.StrokeWidth = 5f;
-
-                    foreach (var face in faces)
+                    using (SKPaint paint = new SKPaint())
                     {
-                        // 擷取臉部圖片
-                        SKBitmap faceBitmap = new SKBitmap(face.FaceRectangle.Width, face.FaceRectangle.Height);
-                        SKRect dest = new SKRect(0, 0, face.FaceRectangle.Width, face.FaceRectangle.Height);
-                        SKRect source = new SKRect(face.FaceRectangle.Left, face.FaceRectangle.Top, face.FaceRectangle.Left + face.FaceRectangle.Width, face.FaceRectangle.Top + face.FaceRectangle.Height);
+                        paint.Color = new SKColor(255, 0, 0);
+                        paint.StrokeWidth = 5f;
 
-                        using (SKCanvas faceCanvas = new SKCanvas(faceBitmap))
+                        foreach (var face in faces)
                         {
-                            faceCanvas.DrawBitmap(libraryBitmap, source, dest);
-                        }
+                            // 擷取臉部圖片
+                            SKBitmap faceBitmap = new SKBitmap(face.FaceRectangle.Width, face.FaceRectangle.Height);
+                            SKRect dest = new SKRect(0, 0, face.FaceRectangle.Width, face.FaceRectangle.Height);
+                            SKRect source = new SKRect(face.FaceRectangle.Left, face.FaceRectangle.Top, face.FaceRectangle.Left + face.FaceRectangle.Width, face.FaceRectangle.Top + face.FaceRectangle.Height);
 
-                        SKImage faceImage = SKImage.FromBitmap(faceBitmap);
+                            using (SKCanvas faceCanvas = new SKCanvas(faceBitmap))
+                            {
+                                faceCanvas.DrawBitmap(libraryBitmap, source, dest);
+                            }
 
-                        List<(string, float)> emotions = new List<(string, float)>
+                            SKImage faceImage = SKImage.FromBitmap(faceBitmap);
+
+                            List<(string, float)> emotions = new List<(string, float)>
                         {
                             ("生氣", face.FaceAttributes.Emotion.Anger),
                             ("鄙視", face.FaceAttributes.Emotion.Contempt),
@@ -78,24 +80,24 @@ namespace IdentifyFaces
                             ("驚喜", face.FaceAttributes.Emotion.Surprise)
                         };
 
-                        var person = await faceServiceClient.GetPersonAsync(personGroupId, results.First(c => c.FaceId == face.FaceId).Candidates[0].PersonId);
-                        string result = string.Format("名稱: {0}\n年紀: {1}\n眼鏡: {2}\n表情: {3}", person.Name, face.FaceAttributes.Age, face.FaceAttributes.Glasses, emotions.OrderByDescending(c => c.Item2).Select(c => c.Item1).First());
+                            var person = await faceServiceClient.GetPersonAsync(personGroupId, results.First(c => c.FaceId == face.FaceId).Candidates[0].PersonId);
+                            string result = string.Format("名稱: {0}\n年紀: {1}\n眼鏡: {2}\n表情: {3}", person.Name, face.FaceAttributes.Age, face.FaceAttributes.Glasses, emotions.OrderByDescending(c => c.Item2).Select(c => c.Item1).First());
 
-                        faceResults.Add(new FaceResult { Result = result, Face = ImageSource.FromStream(() => faceImage.Encode().AsStream())});
+                            faceResults.Add(new FaceResult { Result = result, Face = ImageSource.FromStream(() => faceImage.Encode().AsStream()) });
 
-                        
-                        // 把臉部框起來
-                        canvas.DrawLine(new SKPoint(face.FaceRectangle.Left, face.FaceRectangle.Top), new SKPoint(face.FaceRectangle.Left + face.FaceRectangle.Width, face.FaceRectangle.Top), paint);
-                        canvas.DrawLine(new SKPoint(face.FaceRectangle.Left, face.FaceRectangle.Top), new SKPoint(face.FaceRectangle.Left, face.FaceRectangle.Top + face.FaceRectangle.Height), paint);
-                        canvas.DrawLine(new SKPoint(face.FaceRectangle.Left + face.FaceRectangle.Width, face.FaceRectangle.Top), new SKPoint(face.FaceRectangle.Left + face.FaceRectangle.Width, face.FaceRectangle.Top + face.FaceRectangle.Height), paint);
-                        canvas.DrawLine(new SKPoint(face.FaceRectangle.Left, face.FaceRectangle.Top + face.FaceRectangle.Height), new SKPoint(face.FaceRectangle.Left + face.FaceRectangle.Width, face.FaceRectangle.Top + face.FaceRectangle.Height), paint);
+
+                            // 把臉部框起來
+                            canvas.DrawLine(new SKPoint(face.FaceRectangle.Left, face.FaceRectangle.Top), new SKPoint(face.FaceRectangle.Left + face.FaceRectangle.Width, face.FaceRectangle.Top), paint);
+                            canvas.DrawLine(new SKPoint(face.FaceRectangle.Left, face.FaceRectangle.Top), new SKPoint(face.FaceRectangle.Left, face.FaceRectangle.Top + face.FaceRectangle.Height), paint);
+                            canvas.DrawLine(new SKPoint(face.FaceRectangle.Left + face.FaceRectangle.Width, face.FaceRectangle.Top), new SKPoint(face.FaceRectangle.Left + face.FaceRectangle.Width, face.FaceRectangle.Top + face.FaceRectangle.Height), paint);
+                            canvas.DrawLine(new SKPoint(face.FaceRectangle.Left, face.FaceRectangle.Top + face.FaceRectangle.Height), new SKPoint(face.FaceRectangle.Left + face.FaceRectangle.Width, face.FaceRectangle.Top + face.FaceRectangle.Height), paint);
+                        }
                     }
                 }
+
+                canvasView.InvalidateSurface();
             }
-
-
-
-            canvasView.InvalidateSurface();
+            
         }
 
         public void OnCanvasViewPaintSurface(object sender, SKPaintSurfaceEventArgs args)

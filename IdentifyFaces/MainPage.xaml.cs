@@ -9,6 +9,7 @@ using IdentifyFaces.Interface;
 using Microsoft.ProjectOxford.Face;
 using Microsoft.ProjectOxford.Face.Contract;
 using Plugin.Media;
+using Plugin.Media.Abstractions;
 using Plugin.Permissions;
 using Plugin.Permissions.Abstractions;
 using SkiaSharp;
@@ -33,24 +34,27 @@ namespace IdentifyFaces
 
         public async void PhotoBtnClickAsync(object sender, EventArgs e)
         {
-
-
-            using (Stream stream = await DependencyService.Get<IPicturePicker>().GetImageStreamAsync())
+            var file = await CrossMedia.Current.PickPhotoAsync(new Plugin.Media.Abstractions.PickMediaOptions
             {
-                if (stream != null)
-                {
-                    libraryBitmap = SKBitmap.Decode(stream);
-                    canvasView.InvalidateSurface();
+                PhotoSize = PhotoSize.Medium,
 
+            });
 
-                    await Navigation.PushAsync(new FaceInformationPage(libraryBitmap, faceServiceClient));
-                }
+            if(file != null)
+            {
+                libraryBitmap = SKBitmap.Decode(file.GetStream());
+                canvasView.InvalidateSurface();
             }
+
+            await Navigation.PushAsync(new FaceInformationPage(libraryBitmap, faceServiceClient));
         }
 
         public async void CameraBtnClickAsync(object sender, EventArgs e)
         {
-            var photo = await CrossMedia.Current.TakePhotoAsync(new Plugin.Media.Abstractions.StoreCameraMediaOptions());
+            var photo = await CrossMedia.Current.TakePhotoAsync(new Plugin.Media.Abstractions.StoreCameraMediaOptions()
+            {
+                PhotoSize = PhotoSize.Medium,
+            });
 
             if (photo != null)
             {

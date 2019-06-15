@@ -4,3 +4,6 @@
 	<application android:label="IdentifyFaces.Android"></application>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 </manifest>
+<provider android:name="android.support.v4.content.FileProvider" android:authorities="com.se_std.identifyfaces.fileprovider" android:exported="false" android:grantUriPermissions="true">
+      <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths"></meta-data>
+</provider>
