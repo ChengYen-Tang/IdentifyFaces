@@ -1,17 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using IdentifyFaces.Interface;
 using Microsoft.ProjectOxford.Face;
-using Microsoft.ProjectOxford.Face.Contract;
 using Plugin.Media;
 using Plugin.Media.Abstractions;
-using Plugin.Permissions;
-using Plugin.Permissions.Abstractions;
 using SkiaSharp;
 using SkiaSharp.Views.Forms;
 using Xamarin.Forms;
@@ -34,35 +25,30 @@ namespace IdentifyFaces
 
         public async void PhotoBtnClickAsync(object sender, EventArgs e)
         {
-            var file = await CrossMedia.Current.PickPhotoAsync(new Plugin.Media.Abstractions.PickMediaOptions
+            var file = await CrossMedia.Current.PickPhotoAsync(new PickMediaOptions
             {
                 PhotoSize = PhotoSize.Medium,
-
             });
 
             if(file != null)
             {
                 libraryBitmap = SKBitmap.Decode(file.GetStream());
                 canvasView.InvalidateSurface();
-            }
 
-            await Navigation.PushAsync(new FaceInformationPage(libraryBitmap, faceServiceClient));
+                await Navigation.PushAsync(new FaceInformationPage(libraryBitmap, faceServiceClient));
+            }
         }
 
         public async void CameraBtnClickAsync(object sender, EventArgs e)
         {
-            var photo = await CrossMedia.Current.TakePhotoAsync(new Plugin.Media.Abstractions.StoreCameraMediaOptions()
-            {
-                PhotoSize = PhotoSize.Medium,
-            });
+            var photo = await CrossMedia.Current.TakePhotoAsync(new StoreCameraMediaOptions());
 
             if (photo != null)
             {
                 libraryBitmap = SKBitmap.Decode(photo.GetStream());
                 canvasView.InvalidateSurface();
 
-
-                //await Navigation.PushAsync(new FaceInformationPage(libraryBitmap, faceServiceClient));
+                await Navigation.PushAsync(new FaceInformationPage(libraryBitmap, faceServiceClient));
             }
         }
 
