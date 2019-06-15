@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms" xmlns:skia="clr-namespace:SkiaSharp.Views.Forms;assembly=SkiaSharp.Views.Forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"  Title="臉部資料" x:Class="IdentifyFaces.FaceInformationPage">
+    <ContentPage.Content>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="20" />
+                <RowDefinition Height="200" />
+                <RowDefinition Height="20" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="20" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="10" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="10" />
+            </Grid.ColumnDefinitions>
+            
+            <skia:SKCanvasView x:Name="canvasView"
+                           BackgroundColor="Gray" 
+                           PaintSurface="OnCanvasViewPaintSurface"
+                           Grid.Row="1" Grid.Column="1"/>
+            
+            <ListView x:Name="faceListView" Grid.Row="3" Grid.Column="1"
+                  Margin="10, 5, 10,10" HasUnevenRows="true">
+         
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell Height="120">
+                            <StackLayout Orientation="Horizontal"
+                                         Padding="20, 20, 20, 1">
+                                
+                                <Image Source="{Binding Face}"
+                                       Margin="1, 1, 1, 15"
+                                       VerticalOptions="CenterAndExpand"/>
+                                
+                                <Label Text="{Binding Result}" 
+                                   HorizontalOptions="Start" 
+                                   VerticalOptions="Center"
+                                   TextColor="#009FCC" Margin="40, 1, 1, 10" />
+                                
+                            </StackLayout>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            
+            </ListView>
+            
+        </Grid>
+    </ContentPage.Content>
+</ContentPage>

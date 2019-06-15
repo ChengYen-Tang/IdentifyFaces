@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:skia="clr-namespace:SkiaSharp.Views.Forms;assembly=SkiaSharp.Views.Forms" xmlns:d="http://xamarin.com/schemas/2014/forms/design" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" Title="多媒體系統" x:Class="IdentifyFaces.MainPage">
+    <ContentPage.Padding>
+        <OnPlatform x:TypeArguments="Thickness">
+            <OnPlatform.Platforms>
+                <On Platform="iOS" Value="0, 25, 0, 0" />
+                <On Platform="Android" Value="0, 0, 0, 0" />
+                <On Platform="UWP" Value="0, 0, 0, 0" />
+            </OnPlatform.Platforms>
+        </OnPlatform>
+    </ContentPage.Padding>
+    <AbsoluteLayout>
+        <skia:SKCanvasView x:Name="canvasView"
+                           BackgroundColor="Gray" 
+                           
+                           PaintSurface="OnCanvasViewPaintSurface"
+                           AbsoluteLayout.LayoutBounds="0.5, 0.15, 0.8, 0.4"
+                            AbsoluteLayout.LayoutFlags="All"/>
+        <Button x:Name="CameraButton"
+                FontSize="Large"
+                CornerRadius="10"
+                BorderColor="#49516F"
+                TextColor="#ffffff"
+                BackgroundColor="#009FCC"
+                ContentLayout="Left, 26"
+                Text="相機"
+                AbsoluteLayout.LayoutBounds="0.2, 0.7, 0.3, 0.07"
+                Clicked="CameraBtnClickAsync"
+                AbsoluteLayout.LayoutFlags="All"/>
+        <Button x:Name="PhotoButton"
+                FontSize="Large"
+                CornerRadius="10"
+                BorderColor="#49516F"
+                TextColor="#ffffff"
+                BackgroundColor="#009FCC"
+                ContentLayout="Left, 26"
+                Text="相片"
+                AbsoluteLayout.LayoutBounds="0.8, 0.7, 0.3, 0.07"
+                Clicked="PhotoBtnClickAsync"
+                AbsoluteLayout.LayoutFlags="All"/>
+    </AbsoluteLayout>
+</ContentPage>
