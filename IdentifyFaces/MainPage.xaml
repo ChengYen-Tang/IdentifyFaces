@@ -10,11 +10,13 @@
         </OnPlatform>
     </ContentPage.Padding>
     <AbsoluteLayout>
-        <skia:SKCanvasView x:Name="canvasView"
-                           BackgroundColor="Gray" 
-                           
+        <skia:SKCanvasView
                            PaintSurface="OnCanvasViewPaintSurface"
-                           AbsoluteLayout.LayoutBounds="0.5, 0.15, 0.8, 0.4"
+                           AbsoluteLayout.LayoutBounds="0.5, 0.25, 0.8, 0.1"
+                            AbsoluteLayout.LayoutFlags="All"/>
+        <skia:SKCanvasView
+                           PaintSurface="OnCanvasViewPaintSurface1"
+                           AbsoluteLayout.LayoutBounds="0.5, 0.4, 0.95, 0.1"
                             AbsoluteLayout.LayoutFlags="All"/>
         <Button x:Name="CameraButton"
                 FontSize="Large"

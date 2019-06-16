@@ -14,16 +14,14 @@ namespace IdentifyFaces
     {
         SKBitmap libraryBitmap;
         FaceServiceClient faceServiceClient;
-        ObservableCollection<FaceResult> faceResults;
+        ObservableCollection<FaceResult> faceResults = new ObservableCollection<FaceResult>();
 
         public FaceInformationPage(SKBitmap bitmap, FaceServiceClient ServiceClient)
         {
             InitializeComponent();
 
-            faceResults = new ObservableCollection<FaceResult>();
             faceListView.ItemsSource = faceResults;
             libraryBitmap = bitmap;
-            canvasView.InvalidateSurface();
             faceServiceClient = ServiceClient;
 
             IdentificationAsync();
@@ -31,21 +29,19 @@ namespace IdentifyFaces
 
         private async void IdentificationAsync()
         {
-            string personGroupId = "1421";
-
-            var personGroup = await faceServiceClient.GetPersonGroupAsync(personGroupId);
-
-            Face[] faces;
-            Guid[] faceIds;
+            faceResults.Clear();
+            canvasView.InvalidateSurface();
 
             SKImage image = SKImage.FromBitmap(libraryBitmap);
             SKData encoded = image.Encode();
 
-            faces = await faceServiceClient.DetectAsync(encoded.AsStream(), true, true, new FaceAttributeType[] { FaceAttributeType.Age, FaceAttributeType.Gender, FaceAttributeType.Glasses, FaceAttributeType.Emotion});
-            faceIds = faces.Select(face => face.FaceId).ToArray();
+            Face[] faces = await faceServiceClient.DetectAsync(encoded.AsStream(), true, true, new FaceAttributeType[] { FaceAttributeType.Age, FaceAttributeType.Gender, FaceAttributeType.Glasses, FaceAttributeType.Emotion});
+            Guid[] faceIds = faces.Select(face => face.FaceId).ToArray();
 
             if (faces.Count() > 0)
             {
+                string personGroupId = "1421";
+                var personGroup = await faceServiceClient.GetPersonGroupAsync(personGroupId);
                 var results = await faceServiceClient.IdentifyAsync(personGroupId, faceIds);
                 using (SKCanvas canvas = new SKCanvas(libraryBitmap))
                 {
@@ -69,19 +65,29 @@ namespace IdentifyFaces
                             SKImage faceImage = SKImage.FromBitmap(faceBitmap);
 
                             List<(string, float)> emotions = new List<(string, float)>
-                        {
-                            ("生氣", face.FaceAttributes.Emotion.Anger),
-                            ("鄙視", face.FaceAttributes.Emotion.Contempt),
-                            ("厭惡", face.FaceAttributes.Emotion.Disgust),
-                            ("恐懼", face.FaceAttributes.Emotion.Fear),
-                            ("幸福", face.FaceAttributes.Emotion.Happiness),
-                            ("中性", face.FaceAttributes.Emotion.Neutral),
-                            ("悲傷", face.FaceAttributes.Emotion.Sadness),
-                            ("驚喜", face.FaceAttributes.Emotion.Surprise)
-                        };
+                            {
+                                ("生氣", face.FaceAttributes.Emotion.Anger),
+                                ("鄙視", face.FaceAttributes.Emotion.Contempt),
+                                ("厭惡", face.FaceAttributes.Emotion.Disgust),
+                                ("恐懼", face.FaceAttributes.Emotion.Fear),
+                                ("幸福", face.FaceAttributes.Emotion.Happiness),
+                                ("中性", face.FaceAttributes.Emotion.Neutral),
+                                ("悲傷", face.FaceAttributes.Emotion.Sadness),
+                                ("驚喜", face.FaceAttributes.Emotion.Surprise)
+                            };
 
-                            var person = await faceServiceClient.GetPersonAsync(personGroupId, results.First(c => c.FaceId == face.FaceId).Candidates[0].PersonId);
-                            string result = string.Format("名稱: {0}\n年紀: {1}\n眼鏡: {2}\n表情: {3}", person.Name, face.FaceAttributes.Age, face.FaceAttributes.Glasses, emotions.OrderByDescending(c => c.Item2).Select(c => c.Item1).First());
+                            string result = string.Empty;
+
+                            if (results.First(c => c.FaceId == face.FaceId).Candidates.Count() == 0)
+                            {
+                                result = string.Format("名稱: {0}\n年紀: {1}\n眼鏡: {2}\n表情: {3}", "未知", face.FaceAttributes.Age, face.FaceAttributes.Glasses, emotions.OrderByDescending(c => c.Item2).Select(c => c.Item1).First());
+                            }
+                            else
+                            {
+                                var person = await faceServiceClient.GetPersonAsync(personGroupId, results.First(c => c.FaceId == face.FaceId).Candidates[0].PersonId);
+                                result = string.Format("名稱: {0}\n年紀: {1}\n眼鏡: {2}\n表情: {3}", person.Name, face.FaceAttributes.Age, face.FaceAttributes.Glasses, emotions.OrderByDescending(c => c.Item2).Select(c => c.Item1).First());
+                            }
+                            
 
                             faceResults.Add(new FaceResult { Result = result, Face = ImageSource.FromStream(() => faceImage.Encode().AsStream()) });
 
@@ -97,7 +103,7 @@ namespace IdentifyFaces
 
                 canvasView.InvalidateSurface();
             }
-            
+            await DisplayAlert("通知", "分析完成", "OK");
         }
 
         public void OnCanvasViewPaintSurface(object sender, SKPaintSurfaceEventArgs args)
